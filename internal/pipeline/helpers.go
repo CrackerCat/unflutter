@@ -170,6 +170,13 @@ func ResolvePoolDisplay(pool []cluster.PoolEntry, l *PoolLookups) map[int]string
 			} else if no, ok := l.RefToNamed[pe.RefID]; ok {
 				name := l.ResolveName(no)
 				if name != "" {
+					// Fields share leaf names across owners (e.g. uHb on Wja, Yja, aka).
+					// Qualify with owner when available so pool dumps disambiguate them.
+					if l.CT != nil && no.CID == l.CT.Field {
+						if owner := l.ResolveOwnerName(no); owner != "" {
+							name = owner + "." + name
+						}
+					}
 					display[pe.Index] = name
 				} else {
 					display[pe.Index] = fmt.Sprintf("<%s>", cluster.CidNameV(no.CID, l.CT))
